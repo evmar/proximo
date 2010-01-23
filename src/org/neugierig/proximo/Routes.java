@@ -14,7 +14,7 @@ import android.widget.*;
 
 public class Routes extends ListActivity
                     implements AsyncBackendHelper.Delegate {
-  private MuniAPI.Route[] mRoutes;
+  private ProximoBus.Route[] mRoutes;
   private SplitListAdapter mSplitListAdapter;
   private AsyncBackendHelper mBackendHelper;
   private StarDBAdapter mStarDB;
@@ -54,7 +54,7 @@ public class Routes extends ListActivity
     mCursor = mStarDB.fetchAll();
     startManagingCursor(mCursor);
 
-    String[] from = new String[]{"name", "route"};
+    String[] from = new String[]{"stop_name", "route_name"};
     int[] to = new int[]{android.R.id.text1, android.R.id.text2};
     SimpleCursorAdapter notes = new SimpleCursorAdapter(
         this,
@@ -72,8 +72,8 @@ public class Routes extends ListActivity
 
   @Override
   public void onAsyncResult(Object data) {
-    mRoutes = (MuniAPI.Route[]) data;
-    ListAdapter adapter = new ArrayAdapter<MuniAPI.Route>(
+    mRoutes = (ProximoBus.Route[]) data;
+    ListAdapter adapter = new ArrayAdapter<ProximoBus.Route>(
         this,
         android.R.layout.simple_list_item_1,
         mRoutes);
@@ -87,21 +87,25 @@ public class Routes extends ListActivity
     if (mSplitListAdapter.isInList1(position)) {
       mCursor.moveToPosition(position);
       Intent intent = new Intent(this, Stop.class);
-      intent.putExtra(Route.KEY_ROUTE,
-                      mCursor.getString(mCursor.getColumnIndexOrThrow("route")));
-      intent.putExtra(Route.KEY_DIRECTION,
-                      mCursor.getString(mCursor.getColumnIndexOrThrow("direction")));
-      intent.putExtra(Stop.KEY_NAME,
-                      mCursor.getString(mCursor.getColumnIndexOrThrow("name")));
-      intent.putExtra(Backend.KEY_QUERY,
-                      mCursor.getString(mCursor.getColumnIndexOrThrow("query")));
+      intent.putExtra(ViewState.ROUTE_ID_KEY,
+                      mCursor.getString(mCursor.getColumnIndexOrThrow("route_id")));
+      intent.putExtra(ViewState.ROUTE_NAME_KEY,
+                      mCursor.getString(mCursor.getColumnIndexOrThrow("route_name")));
+      intent.putExtra(ViewState.RUN_ID_KEY,
+                      mCursor.getString(mCursor.getColumnIndexOrThrow("run_id")));
+      intent.putExtra(ViewState.RUN_NAME_KEY,
+                      mCursor.getString(mCursor.getColumnIndexOrThrow("run_name")));
+      intent.putExtra(ViewState.STOP_ID_KEY,
+                      mCursor.getString(mCursor.getColumnIndexOrThrow("stop_id")));
+      intent.putExtra(ViewState.STOP_NAME_KEY,
+                      mCursor.getString(mCursor.getColumnIndexOrThrow("stop_name")));
       startActivity(intent);
     } else {
-      MuniAPI.Route route =
+      ProximoBus.Route route =
           mRoutes[mSplitListAdapter.translateList2Position(position)];
       Intent intent = new Intent(this, Route.class);
-      intent.putExtra(Route.KEY_ROUTE, route.name);
-      intent.putExtra(Backend.KEY_QUERY, route.url);
+      intent.putExtra(ViewState.ROUTE_NAME_KEY, route.displayName);
+      intent.putExtra(ViewState.ROUTE_ID_KEY, route.id);
       startActivity(intent);
     }
   }
