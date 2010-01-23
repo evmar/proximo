@@ -1,0 +1,62 @@
+<!-- Copyright (c) 2010 Evan Martin.  All rights reserved.
+     Use of this source code is governed by a BSD-style license that
+     can be found in the LICENSE file.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              >
+  <!-- Heading -->
+  <LinearLayout
+     android:orientation="horizontal"
+     android:layout_width="fill_parent"
+     android:layout_height="wrap_content"
+     android:gravity="center_vertical"
+     android:background="@android:drawable/title_bar_tall"
+     >
+
+    <!-- Stop name and info -->
+    <LinearLayout
+       android:orientation="vertical"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_weight="1"
+       android:padding="8sp"
+       >
+      <TextView android:id="@+id/title"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:shadowColor="#BB000000"
+                android:shadowRadius="2.75"
+                android:maxLines="1"
+                android:ellipsize="end"
+                />
+      <!-- XXX textColor shouldn't need to be hardcoded white. -->
+      <TextView android:id="@+id/subtitle"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="#fff"
+                android:maxLines="2"
+                android:ellipsize="end"
+                />
+    </LinearLayout>
+
+    <!-- Star widget -->
+    <CheckBox android:id="@+id/star"
+              style="?android:attr/starStyle"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginRight="6dp"
+              android:padding="4sp"
+              />
+  </LinearLayout>
+
+  <ListView android:id="@+id/list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            />
+</LinearLayout>
+

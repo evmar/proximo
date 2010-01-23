@@ -1,0 +1,29 @@
+<!-- Copyright (c) 2010 Evan Martin.  All rights reserved.
+     Use of this source code is governed by a BSD-style license that
+     can be found in the LICENSE file.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="org.neugierig.proximo"
+      android:versionCode="1"
+      android:versionName="1.0">
+    <application android:label="@string/app_name"
+                 android:icon="@drawable/m">
+        <activity android:name=".Routes"
+                  android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".Route"
+                  android:label="@string/route">
+        </activity>
+        <activity android:name=".Stops"
+                  android:label="@string/stops">
+        </activity>
+        <activity android:name=".Stop"
+                  android:label="@string/stop">
+        </activity>
+    </application>
+    <uses-permission android:name="android.permission.INTERNET"/>
+</manifest>

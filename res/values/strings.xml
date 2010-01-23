@@ -1,0 +1,10 @@
+<!-- Copyright (c) 2010 Evan Martin.  All rights reserved.
+     Use of this source code is governed by a BSD-style license that
+     can be found in the LICENSE file.
+-->
+<resources>
+    <string name="app_name">Proximo</string>
+    <string name="route">Route</string>
+    <string name="stops">Stops</string>
+    <string name="stop">Stop</string>
+</resources>

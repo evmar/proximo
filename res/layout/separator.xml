@@ -1,0 +1,9 @@
+<!-- Copyright (c) 2010 Evan Martin.  All rights reserved.
+     Use of this source code is governed by a BSD-style license that
+     can be found in the LICENSE file.
+-->
+<!-- I tried reading through the Android API ravioli for a while to
+     avoid needing to write an XML file and inflate it and etc. just
+     for a simple text style, but I give up. -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+          style="?android:attr/listSeparatorTextViewStyle" />
