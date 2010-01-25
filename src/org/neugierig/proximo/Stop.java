@@ -5,13 +5,13 @@
 package org.neugierig.proximo;
 
 import android.app.*;
-import android.os.Bundle;
+import android.content.*;
+import android.os.*;
 import android.view.*;
 import android.widget.*;
 import android.util.Log;
 
-public class Stop extends Activity implements AsyncBackendHelper.Delegate,
-                                              View.OnClickListener {
+public class Stop extends Activity implements View.OnClickListener {
   private String mRouteId;
   private String mRouteName;
   private String mRunId;
@@ -20,23 +20,10 @@ public class Stop extends Activity implements AsyncBackendHelper.Delegate,
   private String mStopName;
   private ProximoBus.Prediction[] mPredictions;
 
-  private AsyncBackendHelper mBackendHelper;
   private StarDBAdapter mStarDB;
   private CheckBox mStarView;
 
-  private class PredictionsForStopQuery implements AsyncBackend.Query {
-    final String mStopId;
-    final String mRouteId;
-    final boolean mForceRefresh;
-    PredictionsForStopQuery(String routeId, String stopId, boolean forceRefresh) {
-      mRouteId = routeId;
-      mStopId = stopId;
-      mForceRefresh = forceRefresh;
-    }
-    public Object runQuery(Backend backend) throws Exception {
-      return backend.fetchPredictionsForRouteAtStop(mRouteId, mStopId, mForceRefresh);
-    }
-  }
+  private IUpdateService mService;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -63,18 +50,67 @@ public class Stop extends Activity implements AsyncBackendHelper.Delegate,
     mStarView.setOnClickListener(this);
     mStarView.setChecked(mStarDB.isStopAFavorite(mRouteId, mStopId));
 
-    mBackendHelper = new AsyncBackendHelper(this, this);
-    mBackendHelper.start(new PredictionsForStopQuery(mRouteId, mStopId, false));
+    // Turn on the in-progress throbber to show that we're continually fetching
+    // new stop info.
+    setProgressBarIndeterminateVisibility(true);
   }
 
   @Override
-  protected Dialog onCreateDialog(int id) {
-    return mBackendHelper.onCreateDialog(id);
+  public void onStart() {
+    super.onStart();
+    bindService(new Intent(this, UpdateService.class), mConnection,
+                Context.BIND_AUTO_CREATE);
+  }
+  @Override
+  public void onStop() {
+    super.onStop();
+    unbindService(mConnection);
   }
 
-  @Override
-  public void onAsyncResult(Object data) {
-    mPredictions = (ProximoBus.Prediction[]) data;
+  private IUpdateMonitor.Stub mUpdateCallback = new IUpdateMonitor.Stub() {
+      @Override
+      public void onNewPredictions(ProximoBus.Prediction[] predictions) {
+        mHandler.sendMessage(
+            mHandler.obtainMessage(MSG_NEW_PREDICTIONS, predictions));
+      }
+    };
+
+  private ServiceConnection mConnection = new ServiceConnection() {
+      @Override
+      public void onServiceConnected(ComponentName className,
+                                     IBinder service) {
+        mService = IUpdateService.Stub.asInterface(service);
+        try {
+          mService.monitorStop(mRouteId, mStopId, mUpdateCallback);
+        } catch (RemoteException e) {
+          // In this case the service has crashed before we could even
+          // do anything with it; we can count on soon being
+          // disconnected (and then reconnected if it can be
+          // restarted) so there is no need to do anything here.
+        }
+      }
+
+      @Override
+      public void onServiceDisconnected(ComponentName className) {
+        mService = null;
+      }
+    };
+
+  private final static int MSG_NEW_PREDICTIONS = 0;
+  private Handler mHandler = new Handler() {
+      @Override public void handleMessage(Message msg) {
+        switch (msg.what) {
+          case MSG_NEW_PREDICTIONS:
+            showPredictions((ProximoBus.Prediction[])msg.obj);
+            break;
+          default:
+            super.handleMessage(msg);
+        }
+      }
+    };
+
+  public void showPredictions(ProximoBus.Prediction[] predictions) {
+    mPredictions = predictions;
 
     ListView list = (ListView) findViewById(R.id.list);
     ListAdapter adapter;
@@ -102,22 +138,5 @@ public class Stop extends Activity implements AsyncBackendHelper.Delegate,
           mStarDB.removeStopAsFavorite(mRouteId, mStopId);
         break;
     }
-  }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    MenuInflater inflater = getMenuInflater();
-    inflater.inflate(R.menu.stop_menu, menu);
-    return true;
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()) {
-    case R.id.refresh:
-      mBackendHelper.start(new PredictionsForStopQuery(mRouteId, mStopId, true));
-      return true;
-    }
-    return false;
   }
 }

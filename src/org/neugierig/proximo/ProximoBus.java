@@ -6,6 +6,8 @@
 
 package org.neugierig.proximo;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import java.net.*;
 import java.io.*;
 import org.json.*;
@@ -64,7 +66,7 @@ class ProximoBus {
     }
   }
 
-  public static class Prediction extends Displayable {
+  public static class Prediction implements Parcelable {
     public String routeId;
     public String runId;
     public int minutes;
@@ -76,24 +78,61 @@ class ProximoBus {
       prediction.runId = obj.getString("run_id");
       prediction.minutes = obj.getInt("minutes");
       prediction.isDeparting = obj.getBoolean("is_departing");
-      if (prediction.minutes == 0) {
-        if (prediction.isDeparting) {
-          prediction.displayName = "Departing";
+      return prediction;
+    }
+
+    public String toString() {
+      if (minutes == 0) {
+        if (isDeparting) {
+          return "Departing";
         }
         else {
-          prediction.displayName = "Arriving";
+          return "Arriving";
         }
       }
       else {
-        if (prediction.minutes == 1) {
-          prediction.displayName = "1 minute";
+        if (minutes == 1) {
+          return "1 minute";
         }
         else {
-          prediction.displayName = prediction.minutes+" minutes";
+          return minutes+" minutes";
         }
       }
-      return prediction;
     }
+
+    public Prediction() {}
+
+    public Prediction(Parcel in) {
+      routeId = in.readString();
+      runId = in.readString();
+      minutes = in.readInt();
+      isDeparting = in.readInt() != 0;
+    }
+
+    @Override
+    public int describeContents() {
+      return 0;  // No special Parcelable info.
+    }
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+      out.writeString(routeId);
+      out.writeString(runId);
+      out.writeInt(minutes);
+      out.writeInt(isDeparting ? 1 : 0);
+    }
+
+    public static final Parcelable.Creator<Prediction> CREATOR =
+        new Parcelable.Creator<Prediction>() {
+      @Override
+      public Prediction createFromParcel(Parcel in) {
+        return new Prediction(in);
+      }
+
+      @Override
+      public Prediction[] newArray(int size) {
+        return new Prediction[size];
+      }
+    };
   }
 
   static String getAllRoutesPath() {

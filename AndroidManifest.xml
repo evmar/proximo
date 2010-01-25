@@ -24,6 +24,8 @@
         <activity android:name=".Stop"
                   android:label="@string/stop">
         </activity>
+        <service android:label="Stop Updates"
+                 android:name=".UpdateService" />
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
 </manifest>
